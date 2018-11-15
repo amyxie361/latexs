@@ -1,0 +1,171 @@
+\documentclass{article}
+\usepackage[nonatbib]{nips_2016}
+
+\usepackage[breaklinks=true,letterpaper=true,colorlinks,citecolor=black,bookmarks=false]{hyperref}
+\usepackage{amsthm}
+\usepackage{amsmath,amssymb}
+\usepackage{enumitem}
+
+\usepackage[sort&compress,numbers]{natbib}
+\usepackage[normalem]{ulem}
+
+% use Times
+\usepackage{times}
+% For figures
+\usepackage{graphicx} % more modern
+%\usepackage{epsfig} % less modern
+%\usepackage{subfig} 
+
+\graphicspath{{../fig/}}
+
+\usepackage{tikz}
+\usepackage{tkz-tab}
+\usepackage{caption} 
+\usepackage{subcaption} 
+\usetikzlibrary{shapes.geometric, arrows}
+\tikzstyle{arrow} = [very thick,->,>=stealth]
+
+\usepackage{cleveref}
+\usepackage{setspace}
+\usepackage{wrapfig}
+%\usepackage[ruled]{algorithm}
+\usepackage{algpseudocode}
+\usepackage[noend,linesnumbered]{algorithm2e}
+
+\usepackage[disable]{todonotes}
+
+
+\title{Chinese Machine Reading Comprehension \\ on A Children's Book Dataset}
+
+\author{
+	Yu-Qing Xie \\
+	School of Computer Science\\
+	University of Waterloo\\
+	Waterloo, ON, N2L 3G1 \\
+	\texttt{yuqing.xie@uwaterloo.ca} \\
+	%{\color{red} proposal due: October 23; report due: December 3.}
+}
+
+\begin{document}
+\maketitle
+
+\begin{abstract} 
+In this project, I plan to build a system for Chinese machine reading comprehension, mainly on a children's book dataset. That is, given a story and some questions, the model has to provide suitable answers. Many machine reading comprehension systems based on bi-directional attention neural networks have achieved excellent results on general open datasets such as SQuAD\cite{SQuAD1.0}\cite{SQuAD2.0}, and have even out-performed human result. In this project, I plan to adjust existing models such as BiDAF\cite{BiDAF} or r-net\cite{r-net} to achieve competitive results on a children's book dataset. In this project, the evaluation will be the key difficulty, since the dataset is new and there is not a model built for this problem. I will build up a measurement according to the sentence similarity and keyword missing rate. I wish to compare different networks and compare their advantages and disadvantages. Then, I can build a competitive model on this dataset.
+%The proposal is expected to be 2-4 pages (reference excluded), so be concise and to the point.
+\end{abstract} 
+
+\section{Introduction}
+\subsection{Background and Motivation}
+I am currently in a research group for Natural Language Processing and our team tried to build a chatting robot for children. The first version has been built. However, we find the performance is poor in some sense, especially about story comprehension. The robot has a function to tell a story to the child and then have some interactions with the child. For example, it may ask or answer questions such as `Who is the main character in the story?'. But the problem is that even simple questions such as `What is a dwarf?'  cannot be answered by the robot, but chances are children may be curious about these questions. On one hand, the answer to this question is not explicitly stated in the story. Machines do not know what is a dwarf. On the other hand, many existing models cannot judge whether the questions are answerable according to the story. So I want to improve neural network structures to make better answers for (Chinese) machine reading comprehension and solve these difficulties.
+\subsection{Importance and Application}
+If we can let the robot answer more precisely then we could make robots that children more willing to play with. The story telling robot can also help children learn basic reading and communication skills. Moreover, if we can improve (Chinese) reading comprehension, we could not only build a robot for children, but also extract useful information from news, company documents for adults world.
+\subsection{Relation with Machine Learning}
+Basically, I intend to use neural networks to solve Chinese reading comprehension task. There are many existing networks, which can perform quite well on datasets such as SQuAD. Most of the state-of-the-art methods are using deep networks. The current state-of-the-art methods combine a bi-directional LSTM network with the attention method together, which is within the field of machine learning.
+
+\section{Related Work}
+\subsection{SQuADs}
+The Stanford Question Answering Dataset (SQuAD1.0)\cite{SQuAD1.0} provides articles from Wikipedia and human-made question-answering pairs based on the articles. Many structures such as BiDAF\cite{BiDAF}, r-net\cite{r-net} and QA-net\cite{QA-net} have competitive performance on this dataset. This month, BERT from Google AI Language\cite{BERT} has beaten human performance under both measures (exact match and F1-score).
+
+Early this year, the Stanford team also updated the competition to the 2.0 version \cite{SQuAD2.0}. In this version, submitted systems are required to distinguish questions that are unanswerable from the others. Unet\cite{Unet} and SAN\cite{SAN} achieve promising results but still perform 10\% worse than human.
+\subsection{Chinese Reading Comprehension}
+However, few Chinese reading comprehension datasets have been built to improve development of machine reading comprehension. A group from Harbin Institute of Technology built a dataset and baseline about Chinese Children's Fairy Tales (CFT)\cite{CFT}, which is closely related to intention of my work. However, this dataset is mainly about cloze exercises (filling in missing words). It also provides candidate words as the input. Both of these will reduce the difficulty of the problem greatly.
+\subsection{My Dataset and Comprehension}
+I have a Chinese Children's Book dataset (denoted as CBD), with labeled question and answers, attached with basic information about the story, such as the main character, location and main idea. The main difference between my dataset and SQuAD or CFT lies in the following aspects:\\
+
+\begin{description}
+\item [$\bullet$The data quantity].\\
+CBD has fewer articles than SQuAD making the training challanging.
+CBD only has around 200 stories with 4,000 distinguished question-answer pairs. We have different statements for the same questions or answers. For example, children may ask `What is a dwarf?' or ask `How does a dwarf look like', and we may answer `A dwarf is a person never grow tall as we will.' or `A dwarf is someone just as tall as you, dear.' All of these are considered as the same question-answer pair.\\
+SQuAD has up to 500 articles with 100,000 question-answer pairs. Though we have comparable amounts of articles, we have fewer labeled question-answer pairs than SQuAD.\\
+\item [$\bullet$The question-answer form].\\
+SQuAD answers mainly are substrings in the article, CFT answers are single word within candidates, while CBD's answers are mostly summaries or childlike statement of the original sentences in the article as can be seen from the examples above. We are not sure whether the problem can be answered by extracting related phrases.\\
+\item [$\bullet$CBD has extra labeled article information that can be used].\\
+We have information including main characters, location, time, key entities and main idea of the story. We can form extra question-answer pairs according to the extra information.
+\end{description}
+\section{Proposed Work}
+\subsection{Formal Statement of the Problem}
+Next, let us mathematically state the problem. 
+
+For the training set, we have three parts as input: \\
+An article has $n$ paragraphs:
+\begin{equation}
+P=\{P_1, P_2, ..., P_n\}
+\end{equation} 
+$m$ questions:
+\begin{equation}
+ Q=\{Q_1, Q_2, ..., Q_m\}
+\end{equation}
+And the answers to the m questions:
+ \begin{equation}
+ A=\{A_1, A_2, ..., A_m\}.
+ \end{equation}
+More precisely, each $P_i, Q_j, A_j$ is a snippet or sentences. We denote a sentence as:
+\begin{equation}
+S = \{s_1, s_2, ..., s_l\}
+\end{equation}
+which has $l$ words in the sentence. Our dataset has done word segmentation on paragraphs. We only have to apply word segmentation on the other parts.
+
+For the test set, we only have $P$ articles and $Q$ questions as the input for the model. We have to provide the predicted answers from our model and then compare it with the labeled answers for evalutaion.
+
+\subsection{Evaluation}
+The first difficulty will be the evaluation. We have to develop an appropriate measure for comparing the model's output and the labeled answer. My idea is to combine the sentence similarity and the keyword missing rate to give an error rate. 
+For the output of the model, we evaluate the answer in this way:
+Assume $A={A_1, A_2, ..., A_p}$ to be the correct answers, each $A_i$ is one of the similar answers in the answering set and it is a single sentence. $A'$ is the output of our model, which is a single sentence.
+The loss function is defined as:
+\begin{equation}
+L(A, A')=\max_{i \leq p}\{ -(M_{similarity}(A_i, A') + \frac{\#(\text{key word in Intersection of } A_i \text{ and } A')}{\#(\text{key word in Union of } A_i \text{ and }A')})\}
+\end{equation}\\
+We may also judge part of the result manually to judge whether the measurement is suitable. 
+We can rate the answer within the scale from 1 to 5 on following aspects: \\
+Language - is the answer a fluent sentence? \\
+Correctness - is the answer correct for the question? \\
+Completeness - does the answer miss any important information?\\
+
+We will also have to set up a baseline algorithm to compare with.
+I would implement a simple algorithm to locate the most similar sentence with the question in the article according to sentence similarity and word frequency, and take this sentence as the answer. Taking this as a baseline will give us a sense of whether our model has true improvement.\\
+
+After evaluation on our own dataset, we can also run the model on data sets like SQuAD or CFT to compare it with other algorithms.
+\subsection{Difficulties}
+Other than the difficulty of developing an appropriate evaluation scheme, we also have other difficulties. According to previous knowledge, networks may tend to return phrases with similar length, which means answers may fall into separated pieces or may be extremely longer than we want. I wish to create some ideas to solve this problems and then reform a more suitable dataset for current well-performed algorithms which will be difficult, according to the features of CBD. \\
+Moreover, the data size is relatively small for deep neural network training, and also we do not have datasets like SQuAD for Chinese to pre-train. \\
+Also, resources are limited but training and tuning on different models consumes much time and resources. Maybe I will end up using not well chosen hyper parameters. Not to mention structure level improvement on the models.\\
+Finally, we could try to take advantage of question-answer group with different sentence statements. Using similarity analysis, we can pick the questions and answers that can represent the rest, and each of these pairs can considered as distinguished pairs. In this way, we can augment our dataset to decrease the training difficulty.
+\subsection{Tools}
+To solve this problem, I plan to use Tensorflow, PyTorch to build the models. I will need some NLP pre-processing tools for word segmentation and word embedding. 
+\subsection{Goal}
+The bottom line of the project is to locate the related answer in the article with a very low error rate($<10\%$) and can distinguish unanswerable questions from answerable ones. I wish to achieve readable, flexible answers at last, which may be extremely hard.
+
+\subsection{Time Line}
+\begin{table}[htbp]\centering
+	\begin{tabular}{lll}
+		\hline\hline
+		Time(DDL)& Task\\
+		\hline
+		Oct 25	& Clean up the dataset and form more structured input data.\\
+		Nov 1	& Build up models.\\
+		Nov 12	& Run experiments and tune hyper parameters. Analyze results in detail.\\
+		Nov 19	& Make improvement according to error analysis.\\
+		Nov 26	& Writing reports and prepare for result presentation.\\
+		Dec 3	& Making final adjustments.\\
+		\hline
+	\end{tabular}
+	\caption{Project time line.}\label{tab:hh}
+\end{table}
+
+\nocite{*}
+\bibliographystyle{unsrtnat}
+\begin{thebibliography}{99}
+\bibitem{SQuAD1.0}TPranav Rajpurkar, Jian Zhang, Konstantin Lopyrev,and Percy Liang. Squad: 100, 000+ questions for machine comprehension of text.\emph{In Proceedings of the 2016 Conference on Empirical Methods in Natural LanguageProcessing, EMNLP} 2016, Austin, Texas, USA, November 1-4, 2016 , pp.2383–2392,2016.
+\bibitem{BiDAF} Minjoon Seo, Aniruddha Kembhavi, Ali Farhadi, andHannaneh Hajishirzi. Bidirectional attention flow for machine comprehension.\emph{arXiv:1611.01603} , 2016. \emph{Jason Weston, Sumit Chopra, and AntoineBordes. Memory networks. In ICLR} , 2015.
+\bibitem{r-net} Natural Language Computing Group, MicrosoftResearch Asia, R-Net: Machine Reading Comprehension With Self-Matching Networks, \emph{https://www.microsoft.com/en-us/research/publication/mrc/}
+\bibitem{QA-net}Adams Wei Yu , DavidDohan , Minh-Thang Luong, Rui Zhao, Kai Chen, Mohammad Norouzi, Quoc V. Le,QANet: Combining Local Convolution with Global Self-attention for ReadingComprehension, \emph{arXiv:1804.09541 [cs.CL]}.
+\bibitem{BERT}Jacob Devlin, Ming-Wei Chang, Kenton Lee, Kristina Toutanova, BERT: Pre-training of Deep Bidirectional Transformers for Language Understanding, \emph{arXiv:1810.04805 [cs.CL]},11 Oct 2018
+\bibitem{SQuAD2.0}Pranav Rajpurkar, Robin Jia, Percy Liang, Know What You Don't Know: Unanswerable Questions for SQuAD, \emph{arXiv:1806.03822 [cs.CL]}, 11 Jun 2018.
+\bibitem{Unet}Fu Sun, Linyang Li, Xipeng Qiu, Yang Liu, U-Net: Machine Reading Comprehension with Unanswerable Questions, \emph{arXiv:1810.06638 [cs.CL]},12 Oct 2018
+\bibitem{SAN}Xiaodong Liu, Yelong Shen, Kevin Duh, Jianfeng Gao, Stochastic Answer Networks for Machine Reading Comprehension, \emph{arXiv:1712.03556 [cs.CL]}, revised 15 May 2018
+
+\bibitem{CFT}Yiming Cui, Ting Liu, Zhipeng Chen, Shijin Wang, Guoping Hu, Consensus Attention-based Neural Networks for Chinese Reading Comprehension, \emph{published at COLING 2016, arXiv:1607.02250 [cs.CL]}, revised 15 Mar 2018
+\end{thebibliography}
+\bibliography{project}
+
+\end{document}

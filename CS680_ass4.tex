@@ -1,0 +1,82 @@
+\documentclass{article}
+\usepackage[nonatbib]{nips_2016}
+
+\usepackage[breaklinks=true,letterpaper=true,colorlinks,citecolor=black,bookmarks=false]{hyperref}
+\usepackage{amsthm}
+\usepackage{amsmath,amssymb}
+\usepackage{enumitem}
+\usepackage{comment}
+\usepackage[sort&compress,numbers]{natbib}
+\usepackage[normalem]{ulem}
+
+% use Times
+\usepackage{times}
+% For figures
+\usepackage{graphicx} % more modern
+%\usepackage{epsfig} % less modern
+%\usepackage{subfig} 
+
+\graphicspath{{../fig/}}
+
+\usepackage{tikz}
+\usepackage{tkz-tab}
+\usepackage{caption} 
+\usepackage{subcaption} 
+\usetikzlibrary{shapes.geometric, arrows}
+\tikzstyle{arrow} = [very thick,->,>=stealth]
+
+\usepackage{cleveref}
+\usepackage{setspace}
+\usepackage{wrapfig}
+%\usepackage[ruled]{algorithm}
+\usepackage{algpseudocode}
+%\usepackage[noend,linesnumbered]{algorithm2e}
+\usepackage[linesnumbered,ruled,vlined]{algorithm2e}
+
+\usepackage[disable]{todonotes}
+
+\title{CS680 2018 Fall\\Intro to ML\\Assignment 4}
+
+\author{
+	Yu-Qing Xie \\
+	School of Computer Science\\
+	University of Waterloo\\
+	Waterloo, ON, N2L 3G1 \\
+	\texttt{yuqing.xie@uwaterloo.ca} \\
+	%{\color{red} proposal due: October 23; report due: December 3.}
+}
+
+\begin{document}
+\maketitle
+\section{Convolutional Neural Networks (CNN) (50 pts)}
+\subsection{Train a VGG11 net on the MNIST dataset.}
+\subsection{(20 pts) Inspect the training process}
+\begin{itemize}
+\item[(a)(5 pts)]
+\item[(b)(5 pts)]
+\item[(c)(5 pts)]
+\item[(d)(5 pts)]
+\end{itemize}
+\subsection{(10 pts) Inspect the generalization properties of the final model}
+
+\subsection{(20 pts) Verify the effect of regularization}
+
+\section{Gaussian Processes (GP) (20 pts)}
+\subsection{(10 pts)}
+\subsection{(10 pts)}
+
+\section{Regularization (30 pts)}
+\subsection{(15 pts)} 
+\begin{align*}
+&\min_{\mathbf{w} \in \mathbb{R}^d} \sum_{i=1}^n \mathbf{E}[(y_i - \mathbf{w}^{\top}\tilde{\mathbf{x_i}})^2]\\
+=&\min_{\mathbf{w} \in \mathbb{R}^d} \sum_{i=1}^n \mathbf{E}[y_i^2 + (\mathbf{w}^{\top}\tilde{\mathbf{x_i}})^2 - 2y_i\mathbf{w}^{\top}\tilde{\mathbf{x_i}}]\\
+=&\min_{\mathbf{w} \in \mathbb{R}^d} \sum_{i=1}^n (\mathbf{E}y_i^2 + (\mathbf{E}\mathbf{w}^{\top}\tilde{\mathbf{x_i}})^2 - 2\mathbf{E}y_i\mathbf{w}^{\top}\tilde{\mathbf{x_i}})\\
+=&\min_{\mathbf{w} \in \mathbb{R}^d} \sum_{i=1}^n (y_i^2 + (\mathbf{w}^{\top}\mathbf{E}\tilde{\mathbf{x_i}})^2 - 2y_i\mathbf{w}^{\top}\mathbf{E}\tilde{\mathbf{x_i}})\\
+\text{Since  } & \mathbf{E}\tilde{\mathbf{x_i}} = \mathbf{E} (\mathbf{x_i + \epsilon_i}) = \mathbf{x_i}\\
+&\min_{\mathbf{w} \in \mathbb{R}^d} \sum_{i=1}^n \mathbf{E}[(y_i - \mathbf{w}^{\top}\tilde{\mathbf{x_i}})^2]\\
+=&\min_{\mathbf{w} \in \mathbb{R}^d} \sum_{i=1}^n (y_i^2 + (\mathbf{w}^{\top}\mathbf{x_i})^2 - 2y_i\mathbf{w}^{\top}\mathbf{x_i})\\
+=&\min_{\mathbf{w} \in \mathbb{R}^d} \sum_{i=1}^n (y_i - \mathbf{w}^{\top}\mathbf{x_i})^2
+\end{align*}
+\subsection{(15 pts)} 
+\nocite{*}
+\end{document}
